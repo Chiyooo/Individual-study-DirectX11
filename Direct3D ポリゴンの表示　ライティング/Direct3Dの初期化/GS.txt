@@ -1,0 +1,36 @@
+//--------------------------------------------------------------------------------------
+//ジオメトリシェーダー出力構造体
+struct  sGS_PointSprite_Test_Out
+{
+	float4  pos			: SV_POSITION;
+	float2  uv			: TEXCOORD;
+};
+//------------------------------------------------------------------
+//
+//ジオメトリシェーダー
+//
+[maxvertexcount(6)]					//処理後出力する頂点の最大数	
+void  GS_PointSprite_Test(point  sVS_PointSprite_Test_Out  ip_[1],
+	inout  TriangleStream<sGS_PointSprite_Test_Out>  TriStream)
+{
+	sGS_PointSprite_Test_Out  output[4] = {
+		{ ip_[0].pos + float4(-ip_[0].size, +ip_[0].size, 0, 0), float2(0, 0) },//LT
+		{ ip_[0].pos + float4(-ip_[0].size, -ip_[0].size, 0, 0), float2(0, 1) },//LB
+		{ ip_[0].pos + float4(+ip_[0].size, +ip_[0].size, 0, 0), float2(1, 0) },//RT
+		{ ip_[0].pos + float4(+ip_[0].size, -ip_[0].size, 0, 0), float2(1, 1) } //RB
+	};
+	//プロジェクション変換
+	output[0].pos = mul(output[0].pos, mat.projection);
+	output[1].pos = mul(output[1].pos, mat.projection);
+	output[2].pos = mul(output[2].pos, mat.projection);
+	output[3].pos = mul(output[3].pos, mat.projection);
+	//出力（６頂点分）
+	TriStream.Append(output[1]);
+	TriStream.Append(output[0]);
+	TriStream.Append(output[2]);
+	TriStream.RestartStrip();//プリミティブ１個分毎に
+	TriStream.Append(output[3]);
+	TriStream.Append(output[1]);
+	TriStream.Append(output[2]);
+	TriStream.RestartStrip();//プリミティブ１個分毎に
+}
